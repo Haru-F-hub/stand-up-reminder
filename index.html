@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#163c35" />
+    <title>起身一下 - 久坐提醒</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="起身一下，返回首页"><span class="brand-mark">/</span>起身一下</a>
+        <div class="topbar-actions">
+          <span id="notificationStatus" class="quiet-status">提醒已准备</span>
+          <button id="notificationButton" class="icon-button" type="button" aria-label="开启系统通知" title="开启系统通知">◎</button>
+        </div>
+      </header>
+
+      <section class="dashboard" aria-label="久坐提醒控制台">
+        <section class="timer-panel">
+          <p class="eyebrow" id="sessionLabel">本轮专注</p>
+          <div class="timer-wrap">
+            <svg class="timer-ring" viewBox="0 0 220 220" aria-hidden="true">
+              <circle class="ring-track" cx="110" cy="110" r="96" />
+              <circle id="ringProgress" class="ring-progress" cx="110" cy="110" r="96" />
+            </svg>
+            <div class="timer-content">
+              <time id="countdown" class="countdown">45:00</time>
+              <span id="timerMessage">距离下一次活动</span>
+            </div>
+          </div>
+          <div class="timer-controls">
+            <button id="mainTimerButton" class="primary-button" type="button">开始这一轮</button>
+            <button id="resetButton" class="text-button" type="button">重置</button>
+          </div>
+        </section>
+
+        <aside class="side-panel">
+          <section class="today-card">
+            <div class="section-heading"><p class="eyebrow">今天</p><span id="streakLabel" class="streak">连续 1 天</span></div>
+            <div class="today-score"><strong id="completedCount">0</strong><span>次起身活动</span></div>
+            <div class="goal-line"><span>今日目标</span><span id="goalText">0 / 6</span></div>
+            <div class="goal-track"><span id="goalProgress"></span></div>
+          </section>
+
+          <section class="suggestion-card">
+            <p class="eyebrow">下一次休息</p>
+            <p id="suggestionTitle" class="suggestion-title">站起来，活动一下</p>
+            <p id="suggestionText" class="suggestion-text">倒杯水，走几步，让眼睛离开屏幕。</p>
+          </section>
+        </aside>
+      </section>
+
+      <section class="water-section" aria-labelledby="waterTitle">
+        <div class="water-copy">
+          <p class="eyebrow">今日饮水</p>
+          <h2 id="waterTitle">一天 2 升，每次 200 毫升</h2>
+          <p class="water-hint">不用一次喝很多，分成 10 杯，想起来就点一下。</p>
+          <p id="waterReminderStatus" class="water-reminder-status">下次喝水提醒 60:00</p>
+        </div>
+        <div id="waterCard" class="water-card">
+          <div class="water-summary">
+            <div class="water-amount"><strong id="waterAmount">0.0</strong><span>L / 2.0 L</span></div>
+            <span id="waterCupLabel" class="water-cup-label">0 / 10 杯</span>
+          </div>
+          <div id="cupGrid" class="cup-grid" aria-hidden="true"></div>
+          <div class="goal-track water-track"><span id="waterProgress"></span></div>
+          <div class="water-actions">
+            <button id="drinkButton" class="primary-button" type="button">+ 喝水 200ml</button>
+            <button id="undoDrinkButton" class="text-button" type="button" disabled>撤销一杯</button>
+          </div>
+          <p id="waterStatus" class="water-status" aria-live="polite">还差 10 杯</p>
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="settingsTitle">
+        <div class="settings-copy"><p class="eyebrow">提醒设置</p><h1 id="settingsTitle">把节奏调成你能坚持的样子</h1></div>
+        <div class="setting-grid">
+          <label class="setting"><span>专注时长</span><select id="workDuration"><option value="0.16666666666666666">10 秒（测试）</option><option value="10">10 分钟</option><option value="15">15 分钟</option><option value="25">25 分钟</option><option value="45" selected>45 分钟</option><option value="60">60 分钟</option><option value="90">90 分钟</option></select></label>
+          <label class="setting"><span>休息时长</span><select id="breakDuration"><option value="3">3 分钟</option><option value="5" selected>5 分钟</option><option value="10">10 分钟</option></select></label>
+          <label class="setting"><span>每日目标</span><select id="dailyGoal"><option value="4">4 次</option><option value="6" selected>6 次</option><option value="8">8 次</option><option value="10">10 次</option></select></label>
+          <label class="toggle-setting"><span><b>提示音</b><small>提醒时播放简短提示</small></span><input id="soundToggle" type="checkbox" checked /><i aria-hidden="true"></i></label>
+          <label class="setting"><span>喝水提醒间隔</span><select id="waterReminderInterval"><option value="1">1 分钟（测试）</option><option value="30">30 分钟</option><option value="45">45 分钟</option><option value="60" selected>60 分钟</option><option value="90">90 分钟</option><option value="120">120 分钟</option></select></label>
+          <label class="toggle-setting"><span><b>喝水提醒</b><small>到时间提醒你喝一杯水</small></span><input id="waterReminderToggle" type="checkbox" checked /><i aria-hidden="true"></i></label>
+        </div>
+      </section>
+
+      <section class="activity-section" aria-labelledby="activityTitle">
+        <div><p class="eyebrow">微活动库</p><h2 id="activityTitle">不用找动作，照着做就行</h2></div>
+        <div class="activity-list" id="activityList"></div>
+      </section>
+    </main>
+
+    <p id="waterAnnouncer" class="visually-hidden" aria-live="polite"></p>
+
+    <div id="waterToast" class="water-toast" hidden>
+      <span class="water-toast-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C12 2 5 10.2 5 15a7 7 0 0 0 14 0c0-4.8-7-13-7-13Z" fill="currentColor"/></svg></span>
+      <div class="water-toast-copy"><strong>该喝水了</strong><span>来一杯 200ml，慢慢喝。</span></div>
+      <button id="toastDrinkButton" class="primary-button toast-button" type="button">记一杯</button>
+      <button id="toastCloseButton" class="toast-close" type="button" aria-label="关闭喝水提醒">×</button>
+    </div>
+
+    <dialog id="breakDialog" class="break-dialog">
+      <div class="break-content">
+        <p class="eyebrow">现在该活动了</p>
+        <p class="break-timer" id="breakCountdown">05:00</p>
+        <h2 id="breakTitle">离开屏幕，站起来走走</h2>
+        <p id="breakInstruction">把肩膀向后转动，慢慢呼吸几次。</p>
+        <div class="movement-art" aria-hidden="true"><span class="head"></span><span class="body"></span><span class="arm arm-one"></span><span class="arm arm-two"></span><span class="leg leg-one"></span><span class="leg leg-two"></span><span class="ground"></span></div>
+        <button id="completeBreakButton" class="primary-button light-button" type="button">我已活动，继续专注</button>
+        <button id="snoozeButton" class="dialog-text-button" type="button">延后 5 分钟 <span id="snoozeCount"></span></button>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
