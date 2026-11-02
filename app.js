@@ -16,6 +16,7 @@ const storageKey = 'stand-up-today';
 const timerStorageKey = 'stand-up-active-timer';
 const waterStorageKey = 'water-today';
 const waterSettingsKey = 'water-reminder-settings';
+const waterReminderStorageKey = 'water-reminder-today';
 const WATER_GOAL_ML = 2000;
 const WATER_CUP_ML = 200;
 const WATER_CUPS = WATER_GOAL_ML / WATER_CUP_ML;
@@ -101,7 +102,7 @@ function drinkWater() {
   state.waterMl = Math.min(WATER_GOAL_ML, state.waterMl + WATER_CUP_ML);
   persistWater();
   updateWater();
-  if (state.waterMl >= WATER_GOAL_ML) { state.nextWaterReminderAt = null; hideWaterToast(); updateWaterReminderStatus(); }
+  if (state.waterMl >= WATER_GOAL_ML) { state.nextWaterReminderAt = null; persistWaterReminderSchedule(); hideWaterToast(); updateWaterReminderStatus(); }
   else restartWaterReminderCountdown();
 }
 function undoDrink() {
@@ -120,8 +121,18 @@ function updateWaterReminderStatus() {
   if (state.nextWaterReminderAt <= Date.now() && $('breakDialog').open) { status.textContent = '休息结束后提醒喝水'; return; }
   status.textContent = `下次喝水提醒 ${fmt(Math.max(0, Math.ceil((state.nextWaterReminderAt - Date.now()) / 1000)))}`;
 }
+function persistWaterReminderSchedule() {
+  if (state.nextWaterReminderAt == null) { localStorage.removeItem(waterReminderStorageKey); return; }
+  localStorage.setItem(waterReminderStorageKey, JSON.stringify({ date: state.waterDate || new Date().toDateString(), nextAt: state.nextWaterReminderAt }));
+}
+function loadWaterReminderSchedule() {
+  const saved = readStoredJson(waterReminderStorageKey, {});
+  const nextAt = Number(saved.nextAt);
+  state.nextWaterReminderAt = saved.date === new Date().toDateString() && Number.isFinite(nextAt) && nextAt > 0 ? nextAt : null;
+}
 function restartWaterReminderCountdown() {
   state.nextWaterReminderAt = state.waterReminderEnabled && state.waterMl < WATER_GOAL_ML ? Date.now() + state.waterReminderMinutes * 60000 : null;
+  persistWaterReminderSchedule();
   updateWaterReminderStatus();
 }
 function showWaterReminder() {
@@ -141,6 +152,7 @@ function waterReminderTick() {
   if (Date.now() >= state.nextWaterReminderAt) {
     if ($('breakDialog').open) { updateWaterReminderStatus(); return; }
     state.nextWaterReminderAt = Date.now() + state.waterReminderMinutes * 60000;
+    persistWaterReminderSchedule();
     showWaterReminder();
   }
   updateWaterReminderStatus();
@@ -159,4 +171,9 @@ $('toastDrinkButton').addEventListener('click', () => { drinkWater(); hideWaterT
 $('toastCloseButton').addEventListener('click', hideWaterToast);
 $('waterReminderToggle').addEventListener('change', (e) => { state.waterReminderEnabled = e.target.checked; persistWaterSettings(); restartWaterReminderCountdown(); if (!state.waterReminderEnabled) hideWaterToast(); });
 $('waterReminderInterval').addEventListener('change', (e) => { state.waterReminderMinutes = Number(e.target.value); persistWaterSettings(); restartWaterReminderCountdown(); });
-loadProgress(); loadWater(); loadWaterSettings(); renderActivities(); updateDashboard(); updateWater(); restoreTimer(); restartWaterReminderCountdown(); setInterval(waterReminderTick, 1000);
+loadProgress(); loadWater(); loadWaterSettings(); renderActivities(); updateDashboard(); updateWater(); restoreTimer();
+loadWaterReminderSchedule();
+if (!state.waterReminderEnabled || state.waterMl >= WATER_GOAL_ML) { state.nextWaterReminderAt = null; persistWaterReminderSchedule(); updateWaterReminderStatus(); }
+else if (state.nextWaterReminderAt == null) restartWaterReminderCountdown();
+else updateWaterReminderStatus();
+setInterval(waterReminderTick, 1000);
