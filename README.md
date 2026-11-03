@@ -91,13 +91,6 @@ npx serve .
 - 系统通知依赖浏览器的 `Notification` 权限，部分浏览器在非 HTTPS 或非 localhost 环境下会限制该功能。
 - 震动提醒仅在支持的移动浏览器上生效。
 
-## 部署到 GitHub Pages
-
-1. 进入仓库的 **Settings → Pages**。
-2. 在 **Build and deployment** 中选择 **Deploy from a branch**。
-3. 选择 `main` 分支与 `/`（根目录）后保存。
-4. 稍等片刻，页面即可通过 `https://<用户名>.github.io/stand-up-reminder/` 访问。
-
 ## 常见问题
 
 **提醒没有弹出系统通知？**
